@@ -9,11 +9,18 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo/vector-icons": "^14.0.2",
+    "@react-navigation/native": "^6.1.17",
+    "@react-navigation/native-stack": "^6.10.0",
     "axios": "^1.7.2",
     "expo": "~51.0.17",
+    "expo-secure-store": "^13.0.2",
     "expo-status-bar": "~1.12.1",
+    "lottie-react-native": "^6.7.2",
     "react": "18.2.0",
-    "react-native": "0.74.2"
+    "react-native": "0.74.2",
+    "react-native-paper": "^5.12.3",
+    "twrnc": "^4.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
