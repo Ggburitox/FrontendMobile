@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, ScrollView, Image, SafeAreaView, Dimensions } from "react-native";
 import { Button, Text, TextInput } from "react-native-paper";
-import { register } from "../services/api";
+import  {register}  from "../services/api";
 import { useNavigation } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");

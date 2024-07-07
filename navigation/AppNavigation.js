@@ -13,6 +13,9 @@ const AppNavigation = () => {
       <Stack.Navigator initialRouteName={Register}>
         <Stack.Screen name="Register" options={{ headerShown: false }} component={Register} />
         <Stack.Screen name="Login" options={{ headerShown: false }} component={Login} />
+        <Stack.Screen name="News" options={{headerShown: false}} component={HomeScreen} />
+        <Stack.Screen name="Activity" options={{headerShown: false}} component={ActivityScreen} />
+        <Stack.Screen name="Profile" options={{headerShown: false}} component={Profile} />
       </Stack.Navigator>
     </NavigationContainer>
   )
