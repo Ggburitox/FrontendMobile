@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable, FlatList } from 'react-native';
 import { getCurrentPassengerStation, updatePassengerStation, getCurrentStationBuses } from '../services/api';
-import { Gyroscope } from 'expo-sensors';
 
 const Buses = () => {
   const [station, setStation] = useState('');
   const [buses, setBuses] = useState([]);
   const [newStation, setNewStation] = useState('');
-  const [gyroscopeData, setGyroscopeData] = useState({ x: 0, y: 0, z: 0 });
-  const [orientation, setOrientation] = useState('portrait'); // Estado para la orientación
 
   useEffect(() => {
     const fetchStationAndBuses = async () => {
       try {
         const currentStation = await getCurrentPassengerStation();
-        setStation(currentStation);
+        console.log("Current Station:", currentStation);
+        setStation(currentStation.name); // Asegurando que se usa el campo 'name'
         const currentBuses = await getCurrentStationBuses();
+        console.log("Current Buses:", currentBuses);
         setBuses(currentBuses);
       } catch (error) {
         console.error('Failed to fetch station and buses:', error);
@@ -23,22 +22,11 @@ const Buses = () => {
     };
 
     fetchStationAndBuses();
-
-    Gyroscope.setUpdateInterval(1000); // Actualizar cada segundo
-    const subscription = Gyroscope.addListener(gyroscopeData => {
-      setGyroscopeData(gyroscopeData);
-      // Cambia la orientación basado en los datos del giroscopio
-      if (Math.abs(gyroscopeData.x) > 0.5) {
-        setOrientation(orientation => (orientation === 'portrait' ? 'landscape' : 'portrait'));
-      }
-    });
-
-    return () => subscription.remove();
   }, []);
 
   const handleStationChange = async () => {
     try {
-      await updatePassengerStation({ station: newStation });
+      await updatePassengerStation({ name: newStation });
       setStation(newStation);
       const updatedBuses = await getCurrentStationBuses();
       setBuses(updatedBuses);
@@ -53,12 +41,9 @@ const Buses = () => {
     </View>
   );
 
-  // Aplica estilos condicionales en el renderizado
-  const dynamicStyle = orientation === 'portrait' ? styles.portrait : styles.landscape;
-
   return (
-    <View style={[styles.container, dynamicStyle]}>
-      <Text style={styles.header}>Buses Respecto a tu Estación</Text>
+    <View style={styles.container}>
+      <Text style={styles.header}>MIRA LOS BUSES RESPECTO A TU ESTACION</Text>
       <Text style={styles.currentStation}>Estación Actual: {station}</Text>
       <View style={styles.form}>
         <TextInput
@@ -82,19 +67,11 @@ const Buses = () => {
   );
 };
 
-// Define los estilos para las diferentes orientaciones
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#E3F2FD', // Light blue background
     padding: 20,
-  },
-  // Estilos adicionales para las orientaciones
-  portrait: {
-    paddingHorizontal: 20,
-  },
-  landscape: {
-    paddingHorizontal: 50,
   },
   header: {
     fontSize: 28,

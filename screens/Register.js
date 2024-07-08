@@ -3,7 +3,7 @@ import { StyleSheet, ScrollView, Image, SafeAreaView, Dimensions } from "react-n
 import { Button, Text, TextInput } from "react-native-paper";
 import  {register}  from "../services/api";
 import { useNavigation } from "@react-navigation/native";
-
+import logometropolitano from "../media/logometropolitano.jpeg";
 const { width } = Dimensions.get("window");
 
 const Register = () => {
@@ -34,7 +34,7 @@ const Register = () => {
       <ScrollView contentContainerStyle={styles.content}>
         <Image
           style={styles.logo}
-          source={require("../media/logo.jpg")} // Asegúrate de que esta ruta sea correcta
+          source={logometropolitano} // Asegúrate de que esta ruta sea correcta
         />
         <Text style={styles.title}>Regístrate</Text>
         {error ? <Text style={styles.error}>{error}</Text> : null}

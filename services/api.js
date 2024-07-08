@@ -1,29 +1,30 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const IP = 't9phfqs-anonymous-8081.exp.direct'; // usar la ip que te da expo
-const BACKEND_URL = 'http://' + IP + ':8080';
+const IP = '10.0.2.2'; // Use this IP para conectar a localhost desde el emulador de Android
+const BACKEND_URL = `http://${IP}:8080`;
 
 export const register = async (body) => {
     const response = await axios.post(`${BACKEND_URL}/auth/register`, body);
     return response.data;
 };
 
-export const login = async (body) => {
-    try {
-      const response = await axios.post(`${BACKEND_URL}/auth/login`, body);
-      const token = response.data.token;
-      await SecureStore.setItemAsync('token', token);
-      return token;
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
+export const login = async (email, password) => {
+  const response = await axios.post(`${BACKEND_URL}/auth/login`, { email, password });
+  console.log("Login response:", response.data);
+  await SecureStore.setItemAsync('token', response.data.token); // Almacenar token en SecureStore
+  await AsyncStorage.setItem('token', response.data.token); // Almacenar token en AsyncStorage
+  return response.data;
 };
 
 export const getPassenger = async () => {
-    const token = await SecureStore.getItemAsync('token');
-    const response = await axios.get(`${BACKEND_URL}/passenger`, {
+    let token = await SecureStore.getItemAsync('token');
+    if (!token) {
+        token = await AsyncStorage.getItem('token'); // Fallback a AsyncStorage si SecureStore falla
+    }
+    console.log("Token being used:", token);
+    const response = await axios.get(`${BACKEND_URL}/passenger/me`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -32,9 +33,13 @@ export const getPassenger = async () => {
 }
 
 export const updatePassenger = async (passengerData) => {
-  return await axios.put(BACKEND_URL + '/passenger/me', passengerData, {
+  let token = await SecureStore.getItemAsync('token');
+  if (!token) {
+      token = await AsyncStorage.getItem('token'); // Fallback a AsyncStorage si SecureStore falla
+  }
+  return await axios.put(`${BACKEND_URL}/passenger/me`, passengerData, {
       headers: {
-          'Authorization': 'Bearer ' + await SecureStore.getItemAsync('token')
+          'Authorization': `Bearer ${token}`
       }
   }).then(response => {
       return response.data;
@@ -44,9 +49,13 @@ export const updatePassenger = async (passengerData) => {
 }
 
 export const deletePassenger = async () => {
-  return await axios.delete(BACKEND_URL + '/passenger/me', {
+  let token = await SecureStore.getItemAsync('token');
+  if (!token) {
+      token = await AsyncStorage.getItem('token'); // Fallback a AsyncStorage si SecureStore falla
+  }
+  return await axios.delete(`${BACKEND_URL}/passenger/me`, {
       headers: {
-          'Authorization': 'Bearer ' + await SecureStore.getItemAsync('token')
+          'Authorization': `Bearer ${token}`
       }
   }).then(response => {
       return response.data;
@@ -55,35 +64,44 @@ export const deletePassenger = async () => {
   });
 }
 
-export const updatePassengerStation = async (stationDto) => {
-  try {
-    const response = await axios.patch(`${BASE_URL}/me/station`, stationDto);
-    return response.data;
-  } catch (error) {
-    console.error('Error updating passenger station:', error);
-    throw error;
-  }
-};
-
-// Function to get current station buses
 export const getCurrentStationBuses = async () => {
-  try {
-    const response = await axios.get(`${BASE_URL}/current/buses`);
-    return response.data; // Assuming the backend returns an array of BusDto objects
-  } catch (error) {
-    console.error('Error getting current station buses:', error);
-    throw error;
+  let token = await SecureStore.getItemAsync('token');
+  if (!token) {
+      token = await AsyncStorage.getItem('token'); // Fallback a AsyncStorage si SecureStore falla
   }
-};
+  const response = await axios.get(`${BACKEND_URL}/station/current/buses`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  return response.data;
+}
+
+export const updatePassengerStation = async (stationData) => {
+  let token = await SecureStore.getItemAsync('token');
+  if (!token) {
+      token = await AsyncStorage.getItem('token'); // Fallback a AsyncStorage si SecureStore falla
+  }
+  return await axios.patch(`${BACKEND_URL}/passenger/me/station`, stationData, {
+      headers: {
+          'Authorization': `Bearer ${token}`
+      }
+  }).then(response => {
+      return response.data;
+  }).catch(error => {
+      throw error;
+  });
+}
 
 export const getCurrentPassengerStation = async () => {
-  try {
-    const response = await api.get('/me/station');
-    return response.data; // Assuming the server responds with the station data directly
-  } catch (error) {
-    // Handle error appropriately
-    console.error('Error fetching current passenger station:', error);
-    throw error; // Re-throw or handle as needed
+  let token = await SecureStore.getItemAsync('token');
+  if (!token) {
+      token = await AsyncStorage.getItem('token'); // Fallback a AsyncStorage si SecureStore falla
   }
-};
-    
+  const response = await axios.get(`${BACKEND_URL}/passenger/me/station`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  return response.data;
+}

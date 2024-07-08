@@ -2,6 +2,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Register from '../screens/Register';
 import Login from '../screens/Login';
+import HomeScreen from '../screens/HomeScreen';
+import ActivityScreen from '../screens/Buses';
+import Profile from '../screens/Profile';
 
 
 const Stack = createNativeStackNavigator();

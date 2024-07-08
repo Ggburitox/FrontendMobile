@@ -4,8 +4,9 @@ import BottomBar from "../navigation/BottomBar";
 import { getPassenger, updatePassenger, deletePassenger } from "../services/api";
 import { useNavigation } from "@react-navigation/native";
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Icon, Button, Dialog, Portal, Provider } from "react-native-paper";
-import { Gyroscope } from 'expo-sensors';
+import pepo from "../media/pepo.jpg";
 
 const { height } = Dimensions.get("window");
 
@@ -13,9 +14,8 @@ const Profile = () => {
   const navigation = useNavigation();
   const [data, setData] = useState({ firstName: '', lastName: '', email: '' });
   const [editVisible, setEditVisible] = useState(false);
-  const [editData, setEditData] = useState({ firstName: '', email: '' });
+  const [editData, setEditData] = useState({ firstName: '', lastName: '', email: '' });
   const [error, setError] = useState('');
-  const [gyroscopeData, setGyroscopeData] = useState({ x: 0, y: 0, z: 0 });
 
   useEffect(() => {
     const getInfo = async () => {
@@ -29,18 +29,11 @@ const Profile = () => {
     };
 
     getInfo();
-
-    // Gyroscope setup
-    Gyroscope.setUpdateInterval(1000); // Update every second
-    const subscription = Gyroscope.addListener(gyroscopeData => {
-      setGyroscopeData(gyroscopeData);
-    });
-
-    return () => subscription.remove(); // Cleanup on unmount
   }, []);
 
   const logout = async () => {
     await SecureStore.deleteItemAsync('token');
+    await AsyncStorage.removeItem('token'); // Remove token from AsyncStorage
     navigation.navigate("Login");
   };
 
@@ -56,7 +49,8 @@ const Profile = () => {
             try {
               await deletePassenger();
               await SecureStore.deleteItemAsync('token');
-              navigation.navigate("Login");
+              await AsyncStorage.removeItem('token'); // Remove token from AsyncStorage
+              navigation.navigate("Register");
             } catch (error) {
               console.error("Failed to delete profile", error);
               alert("Failed to delete profile");
@@ -68,7 +62,7 @@ const Profile = () => {
   };
 
   const handleEdit = () => {
-    setEditData({ firstName: data.firstName, email: data.email });
+    setEditData({ firstName: data.firstName, lastName: data.lastName, email: data.email });
     setEditVisible(true);
   };
 
@@ -96,7 +90,7 @@ const Profile = () => {
         <View style={styles.content}>
           <Image
             style={styles.profilePicture}
-            source={require('../media/default-profile.png')} // Placeholder image
+            source={pepo} // Placeholder image
           />
           <View style={styles.profileInfo}>
             <View style={styles.infoContainer}>
@@ -110,13 +104,6 @@ const Profile = () => {
             <View style={styles.infoContainer}>
               <Text style={styles.label}>Email</Text>
               <Text style={styles.info}>{data.email}</Text>
-            </View>
-            {/* Display gyroscope data */}
-            <View style={styles.infoContainer}>
-              <Text style={styles.label}>Gyroscope</Text>
-              <Text style={styles.info}>X: {gyroscopeData.x.toFixed(2)}</Text>
-              <Text style={styles.info}>Y: {gyroscopeData.y.toFixed(2)}</Text>
-              <Text style={styles.info}>Z: {gyroscopeData.z.toFixed(2)}</Text>
             </View>
           </View>
         </View>
@@ -141,6 +128,12 @@ const Profile = () => {
                 style={styles.input}
               />
               <TextInput
+                label="Apellido"
+                value={editData.lastName}
+                onChangeText={text => setEditData({ ...editData, lastName: text })}
+                style={styles.input}
+              />
+              <TextInput
                 label="Email"
                 value={editData.email}
                 onChangeText={text => setEditData({ ...editData, email: text })}
@@ -157,7 +150,6 @@ const Profile = () => {
     </Provider>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
