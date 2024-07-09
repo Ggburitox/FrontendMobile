@@ -67,7 +67,7 @@ export const deletePassenger = async () => {
 export const getCurrentStationBuses = async () => {
   let token = await SecureStore.getItemAsync('token');
   if (!token) {
-    token = await AsyncStorage.getItem('token'); // Fallback a AsyncStorage si SecureStore falla
+    token = await AsyncStorage.getItem('token'); // Fallback to AsyncStorage if SecureStore fails
   }
   const response = await axios.get(`${BACKEND_URL}/station/current/buses`, {
     headers: {
@@ -77,13 +77,12 @@ export const getCurrentStationBuses = async () => {
 
   if (Array.isArray(response.data)) {
     return response.data;
-  } else if (response.data && Array.isArray(response.data.buses)) {
-    return response.data.buses;
   } else {
     console.error('Unexpected response format:', response.data);
     return [];
   }
-}
+};
+
 
 export const updatePassengerStation = async (stationData) => {
   let token = await SecureStore.getItemAsync('token');

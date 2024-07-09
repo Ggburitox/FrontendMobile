@@ -13,18 +13,15 @@ const Buses = () => {
       try {
         const currentStation = await getCurrentPassengerStation();
         console.log("Current Station:", currentStation);
-        
-        // Si currentStation es un objeto, extraer el nombre de la estación
+  
+        // Assuming currentStation is an object with a 'name' property
         setStation(currentStation.name || 'Estación no disponible');
-
+  
         const currentBuses = await getCurrentStationBuses();
         console.log("Current Buses:", currentBuses);
-
-        // Verificar si currentBuses es un array y setear los buses
+  
         if (Array.isArray(currentBuses)) {
           setBuses(currentBuses);
-        } else if (currentBuses && Array.isArray(currentBuses.buses)) {
-          setBuses(currentBuses.buses);
         } else {
           console.error('Expected an array of buses, but received:', currentBuses);
           setBuses([]);
@@ -35,9 +32,10 @@ const Buses = () => {
         setBuses([]);
       }
     };
-
+  
     fetchStationAndBuses();
   }, []);
+  
 
   const handleStationChange = async () => {
     try {
@@ -60,7 +58,7 @@ const Buses = () => {
 
   const renderBusItem = ({ item }) => (
     <View style={styles.busContainer}>
-      <Text style={styles.busText}>{item.name} - {item.route}</Text>
+      <Text style={styles.busText}>Plate: {item.plate}, Route: {item.route?.name || "null"}</Text>
     </View>
   );
 
@@ -162,6 +160,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+    justifyContent: 'center',
+    alignItems: 'center', // Center content horizontally
   },
   busText: {
     fontSize: 18,
