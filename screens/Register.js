@@ -1,10 +1,12 @@
-import React, { useState } from "react";
-import { StyleSheet, ScrollView, Image, SafeAreaView, Dimensions } from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, ScrollView, Image, SafeAreaView, Dimensions, View } from "react-native";
 import { Button, Text, TextInput } from "react-native-paper";
-import  {register}  from "../services/api";
+import { register } from "../services/api";
 import { useNavigation } from "@react-navigation/native";
 import logometropolitano from "../media/logometropolitano.jpeg";
-const { width } = Dimensions.get("window");
+import { Gyroscope } from 'expo-sensors';
+
+const { width, height } = Dimensions.get("window");
 
 const Register = () => {
   const navigation = useNavigation();
@@ -13,6 +15,21 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [orientation, setOrientation] = useState('portrait');
+
+  useEffect(() => {
+    Gyroscope.setUpdateInterval(1000); // Actualizar cada segundo
+    const subscription = Gyroscope.addListener(gyroscopeData => {
+      const { x, y, z } = gyroscopeData;
+      if (Math.abs(x) > Math.abs(y)) {
+        setOrientation(x > 0 ? 'landscape-left' : 'landscape-right');
+      } else {
+        setOrientation(y > 0 ? 'portrait' : 'portrait-upside-down');
+      }
+    });
+
+    return () => subscription.remove(); // Cleanup on unmount
+  }, []);
 
   const handleSubmit = async () => {
     if (!firstName || !lastName || !email || !password) {
@@ -29,8 +46,21 @@ const Register = () => {
     }
   };
 
+  const getTransformStyle = () => {
+    switch (orientation) {
+      case 'landscape-left':
+        return { transform: [{ rotate: '90deg' }] };
+      case 'landscape-right':
+        return { transform: [{ rotate: '-90deg' }] };
+      case 'portrait-upside-down':
+        return { transform: [{ rotate: '180deg' }] };
+      default:
+        return { transform: [{ rotate: '0deg' }] };
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, getTransformStyle()]}>
       <ScrollView contentContainerStyle={styles.content}>
         <Image
           style={styles.logo}

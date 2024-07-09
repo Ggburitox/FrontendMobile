@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable, FlatList } from 'react-native';
 import { getCurrentPassengerStation, updatePassengerStation, getCurrentStationBuses } from '../services/api';
+import BottomBar from "../navigation/BottomBar";
 
 const Buses = () => {
   const [station, setStation] = useState('');
@@ -12,12 +13,26 @@ const Buses = () => {
       try {
         const currentStation = await getCurrentPassengerStation();
         console.log("Current Station:", currentStation);
-        setStation(currentStation.name); // Asegurando que se usa el campo 'name'
+        
+        // Si currentStation es un objeto, extraer el nombre de la estación
+        setStation(currentStation.name || 'Estación no disponible');
+
         const currentBuses = await getCurrentStationBuses();
         console.log("Current Buses:", currentBuses);
-        setBuses(currentBuses);
+
+        // Verificar si currentBuses es un array y setear los buses
+        if (Array.isArray(currentBuses)) {
+          setBuses(currentBuses);
+        } else if (currentBuses && Array.isArray(currentBuses.buses)) {
+          setBuses(currentBuses.buses);
+        } else {
+          console.error('Expected an array of buses, but received:', currentBuses);
+          setBuses([]);
+        }
       } catch (error) {
         console.error('Failed to fetch station and buses:', error);
+        setStation('Estación no disponible');
+        setBuses([]);
       }
     };
 
@@ -28,8 +43,16 @@ const Buses = () => {
     try {
       await updatePassengerStation({ name: newStation });
       setStation(newStation);
+
       const updatedBuses = await getCurrentStationBuses();
-      setBuses(updatedBuses);
+      if (Array.isArray(updatedBuses)) {
+        setBuses(updatedBuses);
+      } else if (updatedBuses && Array.isArray(updatedBuses.buses)) {
+        setBuses(updatedBuses.buses);
+      } else {
+        console.error('Expected an array of buses, but received:', updatedBuses);
+        setBuses([]);
+      }
     } catch (error) {
       console.error('Failed to update station:', error);
     }
@@ -57,12 +80,17 @@ const Buses = () => {
         </Pressable>
       </View>
       <Text style={styles.subHeader}>Buses Disponibles:</Text>
-      <FlatList
-        data={buses}
-        renderItem={renderBusItem}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={styles.busList}
-      />
+      {buses.length > 0 ? (
+        <FlatList
+          data={buses}
+          renderItem={renderBusItem}
+          keyExtractor={(item, index) => index.toString()}
+          contentContainerStyle={styles.busList}
+        />
+      ) : (
+        <Text style={styles.noBusesText}>No hay buses disponibles.</Text>
+      )}
+      <BottomBar />
     </View>
   );
 };
@@ -138,6 +166,12 @@ const styles = StyleSheet.create({
   busText: {
     fontSize: 18,
     color: '#0D47A1', // Dark blue for text
+  },
+  noBusesText: {
+    fontSize: 18,
+    color: '#0D47A1', // Dark blue for text
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 
