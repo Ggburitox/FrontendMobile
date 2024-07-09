@@ -1,14 +1,44 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Text, Dimensions, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Gyroscope } from 'expo-sensors';
 import BottomBar from "../navigation/BottomBar";
-import pepe from "../media/buse-de-la-linea-expreso-5.jpg"
+import pepe from "../media/buse-de-la-linea-expreso-5.jpg";
 
 const { height } = Dimensions.get("window");
 
 const HomeScreen = () => {
+  const [orientation, setOrientation] = useState('portrait');
+
+  useEffect(() => {
+    Gyroscope.setUpdateInterval(1000); // Update every second
+    const subscription = Gyroscope.addListener(gyroscopeData => {
+      const { x, y, z } = gyroscopeData;
+      if (Math.abs(x) > Math.abs(y)) {
+        setOrientation(x > 0 ? 'landscape-left' : 'landscape-right');
+      } else {
+        setOrientation(y > 0 ? 'portrait' : 'portrait-upside-down');
+      }
+    });
+
+    return () => subscription.remove(); // Cleanup on unmount
+  }, []);
+
+  const getTransformStyle = () => {
+    switch (orientation) {
+      case 'landscape-left':
+        return { transform: [{ rotate: '90deg' }] };
+      case 'landscape-right':
+        return { transform: [{ rotate: '-90deg' }] };
+      case 'portrait-upside-down':
+        return { transform: [{ rotate: '180deg' }] };
+      default:
+        return { transform: [{ rotate: '0deg' }] };
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, getTransformStyle()]}>
       <View style={styles.content}>
         <Text style={styles.header}>Noticias</Text>
         <View style={styles.newsContainer}>
@@ -21,7 +51,7 @@ const HomeScreen = () => {
           />
         </View>
       </View>
-      <BottomBar/>
+      <BottomBar />
     </SafeAreaView>
   );
 };

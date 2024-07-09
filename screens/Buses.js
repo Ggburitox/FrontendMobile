@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, FlatList } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, FlatList, Image } from 'react-native';
 import { getCurrentPassengerStation, updatePassengerStation, getCurrentStationBuses } from '../services/api';
 import BottomBar from "../navigation/BottomBar";
+import { Gyroscope } from 'expo-sensors';
+import busImage from '../media/bus.jpg'; // Placeholder bus image
 
 const Buses = () => {
   const [station, setStation] = useState('');
   const [buses, setBuses] = useState([]);
   const [newStation, setNewStation] = useState('');
+  const [orientation, setOrientation] = useState('portrait');
 
   useEffect(() => {
     const fetchStationAndBuses = async () => {
@@ -36,6 +39,19 @@ const Buses = () => {
     fetchStationAndBuses();
   }, []);
   
+  useEffect(() => {
+    Gyroscope.setUpdateInterval(1000); // Update every second
+    const subscription = Gyroscope.addListener(gyroscopeData => {
+      const { x, y, z } = gyroscopeData;
+      if (Math.abs(x) > Math.abs(y)) {
+        setOrientation(x > 0 ? 'landscape-left' : 'landscape-right');
+      } else {
+        setOrientation(y > 0 ? 'portrait' : 'portrait-upside-down');
+      }
+    });
+
+    return () => subscription.remove(); // Cleanup on unmount
+  }, []);
 
   const handleStationChange = async () => {
     try {
@@ -58,12 +74,26 @@ const Buses = () => {
 
   const renderBusItem = ({ item }) => (
     <View style={styles.busContainer}>
+      <Image source={busImage} style={styles.busImage} />
       <Text style={styles.busText}>Plate: {item.plate}, Route: {item.route?.name || "null"}</Text>
     </View>
   );
 
+  const getTransformStyle = () => {
+    switch (orientation) {
+      case 'landscape-left':
+        return { transform: [{ rotate: '90deg' }] };
+      case 'landscape-right':
+        return { transform: [{ rotate: '-90deg' }] };
+      case 'portrait-upside-down':
+        return { transform: [{ rotate: '180deg' }] };
+      default:
+        return { transform: [{ rotate: '0deg' }] };
+    }
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, getTransformStyle()]}>
       <Text style={styles.header}>MIRA LOS BUSES RESPECTO A TU ESTACION</Text>
       <Text style={styles.currentStation}>Estación Actual: {station}</Text>
       <View style={styles.form}>
@@ -147,6 +177,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   busContainer: {
+    flexDirection: 'row',
+    alignItems: 'center', // Center content horizontally
     width: '90%',
     backgroundColor: '#FFFFFF',
     padding: 15,
@@ -160,8 +192,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    justifyContent: 'center',
-    alignItems: 'center', // Center content horizontally
+  },
+  busImage: {
+    width: 50,
+    height: 50,
+    marginRight: 15,
   },
   busText: {
     fontSize: 18,

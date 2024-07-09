@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, View, Text, Dimensions, StyleSheet, Pressable, TextInput, Alert, Image } from "react-native";
+import { SafeAreaView, View, Text, Dimensions, StyleSheet, Pressable, Alert, Image } from "react-native";
 import BottomBar from "../navigation/BottomBar";
 import { getPassenger, updatePassenger, deletePassenger } from "../services/api";
 import { useNavigation } from "@react-navigation/native";
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Icon, Button, Dialog, Portal, Provider } from "react-native-paper";
+import { Icon, Button, Dialog, Portal, Provider, TextInput } from "react-native-paper"; // Ensure TextInput is imported correctly
+import { Gyroscope } from 'expo-sensors';
 import pepo from "../media/pepo.jpg";
 
 const { height } = Dimensions.get("window");
@@ -16,6 +17,7 @@ const Profile = () => {
   const [editVisible, setEditVisible] = useState(false);
   const [editData, setEditData] = useState({ firstName: '', lastName: '', email: '' });
   const [error, setError] = useState('');
+  const [orientation, setOrientation] = useState('portrait');
 
   useEffect(() => {
     const getInfo = async () => {
@@ -31,13 +33,27 @@ const Profile = () => {
     getInfo();
   }, []);
 
+  useEffect(() => {
+    Gyroscope.setUpdateInterval(1000); // Update every second
+    const subscription = Gyroscope.addListener(gyroscopeData => {
+      const { x, y, z } = gyroscopeData;
+      if (Math.abs(x) > Math.abs(y)) {
+        setOrientation(x > 0 ? 'landscape-left' : 'landscape-right');
+      } else {
+        setOrientation(y > 0 ? 'portrait' : 'portrait-upside-down');
+      }
+    });
+
+    return () => subscription.remove(); // Cleanup on unmount
+  }, []);
+
   const logout = async () => {
     await SecureStore.deleteItemAsync('token');
     await AsyncStorage.removeItem('token'); // Remove token from AsyncStorage
     navigation.navigate("Login");
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     Alert.alert(
       "Confirmación",
       "¿Estás seguro de que deseas eliminar tu cuenta?",
@@ -53,7 +69,7 @@ const Profile = () => {
               navigation.navigate("Register");
             } catch (error) {
               console.error("Failed to delete profile", error);
-              alert("Failed to delete profile");
+              Alert.alert("Failed to delete profile", error.message || "An error occurred");
             }
           },
         },
@@ -78,9 +94,22 @@ const Profile = () => {
     }
   };
 
+  const getTransformStyle = () => {
+    switch (orientation) {
+      case 'landscape-left':
+        return { transform: [{ rotate: '90deg' }] };
+      case 'landscape-right':
+        return { transform: [{ rotate: '-90deg' }] };
+      case 'portrait-upside-down':
+        return { transform: [{ rotate: '180deg' }] };
+      default:
+        return { transform: [{ rotate: '0deg' }] };
+    }
+  };
+
   return (
     <Provider>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, getTransformStyle()]}>
         <View style={styles.header}>
           <Pressable onPress={logout} style={styles.logoutButton}>
             <Icon name="logout" size={25} color="#FFFFFF" />

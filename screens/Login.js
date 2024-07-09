@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, SafeAreaView, Dimensions, Alert } from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
 import { login } from '../services/api';
 import { useNavigation } from "@react-navigation/native";
+import { Gyroscope } from 'expo-sensors';
 
 const { width } = Dimensions.get("window");
 
@@ -11,6 +12,21 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [orientation, setOrientation] = useState('portrait');
+
+  useEffect(() => {
+    Gyroscope.setUpdateInterval(1000); // Update every second
+    const subscription = Gyroscope.addListener(gyroscopeData => {
+      const { x, y, z } = gyroscopeData;
+      if (Math.abs(x) > Math.abs(y)) {
+        setOrientation(x > 0 ? 'landscape-left' : 'landscape-right');
+      } else {
+        setOrientation(y > 0 ? 'portrait' : 'portrait-upside-down');
+      }
+    });
+
+    return () => subscription.remove(); // Cleanup on unmount
+  }, []);
 
   const handleLogin = async () => {
     try {
@@ -19,13 +35,38 @@ const Login = () => {
       navigation.navigate('Profile'); // Navigate to the profile screen after successful login
     } catch (error) {
       console.error('Login error:', error);
-      setErrorMessage(error.message || 'An error occurred during login.');
-      Alert.alert('Login Failed', error.message || 'An error occurred during login.');
+      let errorMessage = 'An error occurred during login.';
+
+      if (error.response) {
+        if (error.response.status === 404) {
+          errorMessage = 'Usuario no encontrado. Por favor, verifique su email y contraseña.';
+        } else {
+          errorMessage = error.response.data.message || errorMessage;
+        }
+      } else if (error.request) {
+        errorMessage = 'No response was received from the server. Please try again later.';
+      }
+
+      setErrorMessage(errorMessage);
+      Alert.alert('Login Failed', errorMessage);
+    }
+  };
+
+  const getTransformStyle = () => {
+    switch (orientation) {
+      case 'landscape-left':
+        return { transform: [{ rotate: '90deg' }] };
+      case 'landscape-right':
+        return { transform: [{ rotate: '-90deg' }] };
+      case 'portrait-upside-down':
+        return { transform: [{ rotate: '180deg' }] };
+      default:
+        return { transform: [{ rotate: '0deg' }] };
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, getTransformStyle()]}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Logeate</Text>
         {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}

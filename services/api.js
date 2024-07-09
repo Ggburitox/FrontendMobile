@@ -49,20 +49,28 @@ export const updatePassenger = async (passengerData) => {
 }
 
 export const deletePassenger = async () => {
-  let token = await SecureStore.getItemAsync('token');
-  if (!token) {
+  try {
+    let token = await SecureStore.getItemAsync('token');
+    if (!token) {
       token = await AsyncStorage.getItem('token'); // Fallback to AsyncStorage if SecureStore fails
-  }
-  return await axios.delete(`${BACKEND_URL}/passenger/me`, {
+    }
+
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await axios.delete(`${BACKEND_URL}/passenger/me`, {
       headers: {
-          'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`
       }
-  }).then(response => {
-      return response.data;
-  }).catch(error => {
-      throw error;
-  });
-}
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Failed to delete passenger', error);
+    throw error;
+  }
+};
 
 export const getCurrentStationBuses = async () => {
   let token = await SecureStore.getItemAsync('token');
