@@ -68,7 +68,7 @@ const Login = () => {
   return (
     <SafeAreaView style={[styles.container, getTransformStyle()]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Logeate</Text>
+        <Text style={styles.title}>Logueate</Text>
         {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
         <TextInput
           mode="outlined"
