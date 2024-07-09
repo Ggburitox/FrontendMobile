@@ -5,7 +5,7 @@ import { getPassenger, updatePassenger, deletePassenger } from "../services/api"
 import { useNavigation } from "@react-navigation/native";
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Icon, Button, Dialog, Portal, Provider, TextInput } from "react-native-paper"; // Ensure TextInput is imported correctly
+import { Icon, Button, Dialog, Portal, Provider, TextInput } from "react-native-paper";
 import { Gyroscope } from 'expo-sensors';
 import pepo from "../media/pepo.jpg";
 
@@ -34,9 +34,9 @@ const Profile = () => {
   }, []);
 
   useEffect(() => {
-    Gyroscope.setUpdateInterval(1000); // Update every second
+    Gyroscope.setUpdateInterval(1000);
     const subscription = Gyroscope.addListener(gyroscopeData => {
-      const { x, y, z } = gyroscopeData;
+      const { x, y } = gyroscopeData;
       if (Math.abs(x) > Math.abs(y)) {
         setOrientation(x > 0 ? 'landscape-left' : 'landscape-right');
       } else {
@@ -44,12 +44,12 @@ const Profile = () => {
       }
     });
 
-    return () => subscription.remove(); // Cleanup on unmount
+    return () => subscription.remove();
   }, []);
 
   const logout = async () => {
     await SecureStore.deleteItemAsync('token');
-    await AsyncStorage.removeItem('token'); // Remove token from AsyncStorage
+    await AsyncStorage.removeItem('token');
     navigation.navigate("Login");
   };
 
@@ -65,7 +65,7 @@ const Profile = () => {
             try {
               await deletePassenger();
               await SecureStore.deleteItemAsync('token');
-              await AsyncStorage.removeItem('token'); // Remove token from AsyncStorage
+              await AsyncStorage.removeItem('token');
               navigation.navigate("Register");
             } catch (error) {
               console.error("Failed to delete profile", error);
@@ -119,7 +119,7 @@ const Profile = () => {
         <View style={styles.content}>
           <Image
             style={styles.profilePicture}
-            source={pepo} // Placeholder image
+            source={pepo}
           />
           <View style={styles.profileInfo}>
             <View style={styles.infoContainer}>
@@ -183,7 +183,7 @@ const Profile = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#E3F2FD", // Light blue background
+    backgroundColor: "#E3F2FD",
     justifyContent: 'space-between',
   },
   header: {
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     width: '90%',
-    backgroundColor: "#FFFFFF", // White background for info container
+    backgroundColor: "#FFFFFF",
     borderRadius: 10,
     padding: 15,
     shadowColor: "#000",
@@ -225,12 +225,12 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: "#0D47A1", // Dark blue for label
+    color: "#0D47A1",
     marginBottom: 5,
   },
   info: {
     fontSize: 18,
-    color: "#0D47A1", // Dark blue for text
+    color: "#0D47A1",
   },
   buttons: {
     flexDirection: 'row',
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 10,
-    backgroundColor: '#0D47A1', // Dark blue for button
+    backgroundColor: '#0D47A1',
   },
   input: {
     marginBottom: 15,

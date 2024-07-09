@@ -3,7 +3,7 @@ import { View, Text, TextInput, StyleSheet, Pressable, FlatList, Image } from 'r
 import { getCurrentPassengerStation, updatePassengerStation, getCurrentStationBuses } from '../services/api';
 import BottomBar from "../navigation/BottomBar";
 import { Gyroscope } from 'expo-sensors';
-import busImage from '../media/bus.jpg'; // Placeholder bus image
+import busImage from '../media/bus.jpg';
 
 const Buses = () => {
   const [station, setStation] = useState('');
@@ -16,8 +16,6 @@ const Buses = () => {
       try {
         const currentStation = await getCurrentPassengerStation();
         console.log("Current Station:", currentStation);
-  
-        // Assuming currentStation is an object with a 'name' property
         setStation(currentStation.name || 'Estación no disponible');
   
         const currentBuses = await getCurrentStationBuses();
@@ -40,9 +38,9 @@ const Buses = () => {
   }, []);
   
   useEffect(() => {
-    Gyroscope.setUpdateInterval(1000); // Update every second
+    Gyroscope.setUpdateInterval(1000);
     const subscription = Gyroscope.addListener(gyroscopeData => {
-      const { x, y, z } = gyroscopeData;
+      const { x, y } = gyroscopeData;
       if (Math.abs(x) > Math.abs(y)) {
         setOrientation(x > 0 ? 'landscape-left' : 'landscape-right');
       } else {
@@ -50,7 +48,7 @@ const Buses = () => {
       }
     });
 
-    return () => subscription.remove(); // Cleanup on unmount
+    return () => subscription.remove();
   }, []);
 
   const handleStationChange = async () => {
@@ -126,19 +124,19 @@ const Buses = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E3F2FD', // Light blue background
+    backgroundColor: '#E3F2FD',
     padding: 20,
   },
   header: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#0D47A1', // Dark blue for text
+    color: '#0D47A1',
     marginBottom: 20,
     textAlign: 'center',
   },
   currentStation: {
     fontSize: 18,
-    color: '#0D47A1', // Dark blue for text
+    color: '#0D47A1',
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -169,7 +167,7 @@ const styles = StyleSheet.create({
   subHeader: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#0D47A1', // Dark blue for text
+    color: '#0D47A1',
     marginBottom: 10,
     textAlign: 'center',
   },
@@ -178,7 +176,7 @@ const styles = StyleSheet.create({
   },
   busContainer: {
     flexDirection: 'row',
-    alignItems: 'center', // Center content horizontally
+    alignItems: 'center',
     width: '90%',
     backgroundColor: '#FFFFFF',
     padding: 15,
@@ -200,11 +198,11 @@ const styles = StyleSheet.create({
   },
   busText: {
     fontSize: 18,
-    color: '#0D47A1', // Dark blue for text
+    color: '#0D47A1',
   },
   noBusesText: {
     fontSize: 18,
-    color: '#0D47A1', // Dark blue for text
+    color: '#0D47A1',
     textAlign: 'center',
     marginTop: 20,
   },

@@ -11,9 +11,9 @@ const HomeScreen = () => {
   const [orientation, setOrientation] = useState('portrait');
 
   useEffect(() => {
-    Gyroscope.setUpdateInterval(1000); // Update every second
+    Gyroscope.setUpdateInterval(1000);
     const subscription = Gyroscope.addListener(gyroscopeData => {
-      const { x, y, z } = gyroscopeData;
+      const { x, y } = gyroscopeData;
       if (Math.abs(x) > Math.abs(y)) {
         setOrientation(x > 0 ? 'landscape-left' : 'landscape-right');
       } else {
@@ -21,7 +21,7 @@ const HomeScreen = () => {
       }
     });
 
-    return () => subscription.remove(); // Cleanup on unmount
+    return () => subscription.remove();
   }, []);
 
   const getTransformStyle = () => {
@@ -59,7 +59,7 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#E3F2FD", // Light blue background
+    backgroundColor: "#E3F2FD",
     justifyContent: 'space-between',
   },
   content: {
@@ -68,12 +68,12 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: "#0D47A1", // Dark blue for text
+    color: "#0D47A1",
     marginBottom: 20,
     textAlign: 'center',
   },
   newsContainer: {
-    backgroundColor: "#FFFFFF", // White background for news container
+    backgroundColor: "#FFFFFF",
     borderRadius: 10,
     padding: 15,
     shadowColor: "#000",
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   },
   newsText: {
     fontSize: 18,
-    color: "#0D47A1", // Dark blue for text
+    color: "#0D47A1",
     marginBottom: 10,
   },
   image: {

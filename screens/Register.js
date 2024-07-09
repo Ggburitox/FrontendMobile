@@ -18,9 +18,9 @@ const Register = () => {
   const [orientation, setOrientation] = useState('portrait');
 
   useEffect(() => {
-    Gyroscope.setUpdateInterval(1000); // Actualizar cada segundo
+    Gyroscope.setUpdateInterval(1000);
     const subscription = Gyroscope.addListener(gyroscopeData => {
-      const { x, y, z } = gyroscopeData;
+      const { x, y } = gyroscopeData;
       if (Math.abs(x) > Math.abs(y)) {
         setOrientation(x > 0 ? 'landscape-left' : 'landscape-right');
       } else {
@@ -28,7 +28,7 @@ const Register = () => {
       }
     });
 
-    return () => subscription.remove(); // Cleanup on unmount
+    return () => subscription.remove();
   }, []);
 
   const handleSubmit = async () => {
@@ -64,7 +64,7 @@ const Register = () => {
       <ScrollView contentContainerStyle={styles.content}>
         <Image
           style={styles.logo}
-          source={logometropolitano} // Asegúrate de que esta ruta sea correcta
+          source={logometropolitano}
         />
         <Text style={styles.title}>Regístrate</Text>
         {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -119,7 +119,7 @@ const Register = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#E3F2FD", // Azul claro para el fondo
+    backgroundColor: "#E3F2FD",
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -140,18 +140,18 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: "#0D47A1", // Azul oscuro para el título
+    color: "#0D47A1",
   },
   input: {
-    width: width * 0.9, // 90% del ancho de la pantalla
+    width: width * 0.9,
     marginBottom: 15,
     backgroundColor: '#FFF',
   },
   button: {
-    width: width * 0.9, // 90% del ancho de la pantalla
+    width: width * 0.9,
     paddingVertical: 10,
     marginVertical: 16,
-    backgroundColor: '#0D47A1', // Azul oscuro para el botón
+    backgroundColor: '#0D47A1',
   },
   buttonText: {
     color: "#FFFFFF",
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   },
   loginText: {
     marginTop: 20,
-    color: "#007BFF", // Azul para el texto de inicio de sesión
+    color: "#007BFF",
     textDecorationLine: 'underline',
     fontSize: 16,
   },

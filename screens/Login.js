@@ -15,9 +15,9 @@ const Login = () => {
   const [orientation, setOrientation] = useState('portrait');
 
   useEffect(() => {
-    Gyroscope.setUpdateInterval(1000); // Update every second
+    Gyroscope.setUpdateInterval(1000);
     const subscription = Gyroscope.addListener(gyroscopeData => {
-      const { x, y, z } = gyroscopeData;
+      const { x, y } = gyroscopeData;
       if (Math.abs(x) > Math.abs(y)) {
         setOrientation(x > 0 ? 'landscape-left' : 'landscape-right');
       } else {
@@ -25,14 +25,14 @@ const Login = () => {
       }
     });
 
-    return () => subscription.remove(); // Cleanup on unmount
+    return () => subscription.remove();
   }, []);
 
   const handleLogin = async () => {
     try {
       const data = await login(email, password);
       console.log('Login successful:', data);
-      navigation.navigate('Profile'); // Navigate to the profile screen after successful login
+      navigation.navigate('Profile');
     } catch (error) {
       console.error('Login error:', error);
       let errorMessage = 'An error occurred during login.';
